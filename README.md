@@ -1,26 +1,36 @@
-# Clinical Document QA — Local RAG
+# RAG Engine — Local Vector RAG
 
-An **Ollama-first**, fully local Retrieval-Augmented Generation service that
-answers questions over **clinical protocols, guidelines and discharge
-summaries** — with citations, running entirely on your own infrastructure.
+An **Ollama-first**, fully local Retrieval-Augmented Generation engine that
+answers questions over **any text corpus** — with citations, running entirely on
+your own infrastructure. Ingest documents, embed them into an in-process vector
+store, and get grounded, cited answers.
 
-**Problem statement.** Clinicians and care teams need fast, *cited* answers from
-a large body of protocols and guidelines ("what's first-line for type 2
-diabetes?", "what's the discharge checklist?"). Sending that text to a hosted
-LLM raises privacy concerns; this service keeps everything **local** (Ollama +
-an in-process index) and grounds every answer in retrieved source text.
+> Ships with a tiny neutral sample knowledge base so it runs out of the box.
+> Replace `data/sample_knowledge_base.md` with your own corpus — policies,
+> manuals, contracts, protocols, FAQs — and nothing else changes.
 
-> Sample documents are **synthetic** — not medical advice, no real PHI.
+## Use cases
+
+The engine is the same; only the corpus changes. Examples:
+
+| Domain | Corpus you ingest | Example question |
+|--------|-------------------|------------------|
+| **Healthcare** | clinical protocols, guidelines | "What's first-line for type 2 diabetes?" |
+| **Legal** | contracts, charter parties, policies | "What's the demurrage rate on late discharge?" |
+| **Customer support** | help center, FAQs, SLAs | "How long do I have to request a refund?" |
+| **HR / IT** | employee handbook, runbooks | "What are the password requirements?" |
+| **Finance / compliance** | regulations, filings | "What's the data-retention period?" |
+| **Research** | papers, technical docs | "What method did the authors use for X?" |
 
 ## Stack
 
 - **Backend:** FastAPI (an async Flask-equivalent — serves the HTTP API and auto
   docs at `/docs`).
 - **Frontend:** a lightweight browser UI (`web/`) served at `/` — ingest a
-  document and ask questions, with a citations panel. **This is where the user
-  interacts.**
+  document and ask questions, with a citations panel and one-click example
+  questions. **This is where the user interacts.**
 - **Model:** Ollama (local LLM + embeddings), with a deterministic offline
-  fallback so the pipeline and tests run with no model server.
+  fallback so the pipeline and tests run with no model server (CI-safe).
 - **Deploy:** single Docker image or `docker compose` (API + Ollama). See
   [DEPLOYMENT.md](DEPLOYMENT.md).
 
@@ -60,13 +70,13 @@ python demo.py          # CLI demo (RAG_OFFLINE=1 to force offline)
 
 ```bash
 curl -X POST localhost:8000/ask -H 'Content-Type: application/json' \
-  -d '{"question": "What is the first-line pharmacologic agent for type 2 diabetes?"}'
+  -d '{"question": "How long do I have to request a refund?"}'
 ```
 
 ```json
 {
-  "answer": "Metformin is the preferred initial pharmacologic agent for type 2 diabetes unless contraindicated...",
-  "sources": [{ "rank": 1, "source": "clinical_protocol.md", "score": 0.52, "excerpt": "..." }]
+  "answer": "A customer may request a refund within 30 days of purchase...",
+  "sources": [{ "rank": 1, "source": "sample_knowledge_base.md", "score": 0.52, "excerpt": "..." }]
 }
 ```
 
