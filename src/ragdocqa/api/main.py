@@ -1,4 +1,4 @@
-"""FastAPI serving layer for the local clinical document-QA service.
+"""FastAPI serving layer for the local document-QA (vector RAG) engine.
 
 Endpoints:
   GET  /         - the browser chat UI (static)
@@ -21,19 +21,19 @@ from ragdocqa.core.backends import OllamaLLM
 from ragdocqa.core.pipeline import RagPipeline
 
 _WEB_DIR = Path(__file__).resolve().parents[3] / "web"
-_SAMPLE = Path("data/clinical_protocol.md")
+_SAMPLE = Path("data/sample_knowledge_base.md")
 
 app = FastAPI(
-    title="Clinical Document QA (Local RAG)",
+    title="RAG Engine (Local Vector RAG)",
     version="0.1.0",
-    description="Ollama-first retrieval-augmented QA over clinical protocols, "
-    "guidelines and discharge summaries — fully local, with citations.",
+    description="Ollama-first retrieval-augmented QA over ANY text corpus — "
+    "swap in your own documents. Fully local, with citations.",
 )
 
 # One in-process pipeline/index for the app's lifetime.
 _pipeline = RagPipeline()
 
-# Pre-ingest the bundled synthetic protocol so the UI works immediately.
+# Pre-ingest the bundled sample knowledge base so the UI works immediately.
 if _SAMPLE.exists():
     try:
         _pipeline.ingest(_SAMPLE.read_text(encoding="utf-8"), source=_SAMPLE.name)
@@ -44,9 +44,9 @@ if _SAMPLE.exists():
 class IngestRequest(BaseModel):
     text: str = Field(
         ...,
-        examples=["Metformin is the preferred initial pharmacologic agent for type 2 diabetes unless contraindicated."],
+        examples=["A customer may request a refund within 30 days of purchase."],
     )
-    source: str = Field("inline", examples=["protocol.txt"])
+    source: str = Field("inline", examples=["policy.txt"])
 
 
 class IngestResponse(BaseModel):
@@ -56,7 +56,7 @@ class IngestResponse(BaseModel):
 
 class AskRequest(BaseModel):
     question: str = Field(
-        ..., examples=["What is the first-line therapy for type 2 diabetes?"]
+        ..., examples=["What is the SLA for priority incidents?"]
     )
     top_k: int | None = Field(None, ge=1, le=20)
 
