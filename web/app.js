@@ -1,4 +1,4 @@
-// Minimal UI for the Clinical Document QA API (same-origin: /health, /ingest, /ask).
+// Minimal UI for the RAG Engine API (same-origin: /health, /ingest, /ask).
 
 const chat = document.getElementById("chat");
 const form = document.getElementById("form");
@@ -91,5 +91,10 @@ form.addEventListener("submit", (e) => {
   const q = input.value.trim();
   if (q) ask(q);
 });
+
+// Example question buttons: click to ask immediately.
+for (const btn of document.querySelectorAll("#examples button")) {
+  btn.addEventListener("click", () => ask(btn.textContent.trim()));
+}
 
 refreshHealth();

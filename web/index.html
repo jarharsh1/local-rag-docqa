@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Clinical Document QA</title>
+  <title>RAG Engine</title>
   <style>
     :root { --bg:#0f172a; --panel:#1e293b; --accent:#34d399; --text:#e2e8f0;
       --muted:#94a3b8; --border:#334155; --user:#10b981; }
@@ -29,28 +29,37 @@
     .cites summary { cursor:pointer; color:var(--accent); }
     .hint { color:var(--muted); font-size:13px; }
     h3 { margin:6px 0 0; font-size:14px; color:var(--muted); font-weight:600; }
+    .examples { display:flex; flex-wrap:wrap; gap:8px; }
+    .examples button { background:var(--panel); color:var(--text); border:1px solid var(--border);
+      font-weight:400; font-size:13px; padding:8px 12px; }
   </style>
 </head>
 <body>
   <header>
-    <h1>📄 Clinical Document QA</h1>
+    <h1>📄 RAG Engine</h1>
     <span class="pill" id="backend">backend: …</span>
     <span class="pill" id="chunks">index: …</span>
   </header>
   <main>
-    <p class="hint">Add a document, then ask questions. Answers are retrieved from
-      your indexed text and cited (synthetic data — no PHI).</p>
+    <p class="hint">Local vector RAG over any text corpus. Add a document, then ask
+      questions — answers are retrieved from your indexed text and cited.</p>
 
     <h3>1. Ingest a document</h3>
     <div class="row">
       <textarea id="doc" placeholder="Paste document text here…"></textarea>
     </div>
     <div class="row">
-      <input id="src" placeholder="source name (e.g. protocol.txt)" value="pasted.txt" />
+      <input id="src" placeholder="source name (e.g. policy.txt)" value="pasted.txt" />
       <button id="ingest" type="button">Ingest</button>
     </div>
 
     <h3>2. Ask</h3>
+    <div class="examples" id="examples">
+      <button type="button">How long do I have to request a refund?</button>
+      <button type="button">What is the SLA for priority incidents?</button>
+      <button type="button">How long is personal data retained?</button>
+      <button type="button">What are the password requirements?</button>
+    </div>
     <div class="chat" id="chat"></div>
     <form id="form" class="row">
       <input id="q" placeholder="Ask about the ingested documents…" autocomplete="off" />
