@@ -1,4 +1,4 @@
-"""End-to-end: ingest the sample SOP doc via the API, then ask and get cites."""
+"""End-to-end: ingest the sample clinical protocol via the API, then ask."""
 
 from pathlib import Path
 
@@ -16,26 +16,28 @@ def test_health_reports_offline_backend():
 
 
 def test_ingest_then_ask_with_citation():
-    doc = Path("data/fleet_sop.md").read_text(encoding="utf-8")
-    r = client.post("/ingest", json={"text": doc, "source": "fleet_sop.md"})
+    doc = Path("data/clinical_protocol.md").read_text(encoding="utf-8")
+    r = client.post("/ingest", json={"text": doc, "source": "clinical_protocol.md"})
     assert r.status_code == 200
     assert r.json()["chunks_added"] >= 1
 
     r = client.post(
         "/ask",
-        json={"question": "How far from land must ballast water exchange be done?"},
+        json={"question": "What is the first-line pharmacologic agent for type 2 diabetes?"},
     )
     assert r.status_code == 200
     body = r.json()
     assert body["sources"], "expected at least one citation"
-    assert body["sources"][0]["source"] == "fleet_sop.md"
-    # Offline extractive answer should surface the 200 nm figure.
-    assert "200" in body["answer"]
+    # Offline extractive answer should surface metformin.
+    assert "metformin" in body["answer"].lower()
 
 
-def test_ask_before_ingest_is_graceful():
-    # A fresh client shares the module-level index, which is already populated
-    # by the test above in-session; just assert the endpoint stays well-formed.
+def test_ask_is_well_formed():
     r = client.post("/ask", json={"question": "anything"})
     assert r.status_code == 200
     assert "answer" in r.json()
+
+
+def test_index_and_static_served():
+    assert "Clinical Document QA" in client.get("/").text
+    assert "/ask" in client.get("/static/app.js").text

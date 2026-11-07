@@ -1,4 +1,4 @@
-"""End-to-end CLI demo: ingest the sample SOP doc and answer a few questions.
+"""End-to-end CLI demo: ingest the sample clinical protocol and ask questions.
 
     python demo.py
 
@@ -11,16 +11,16 @@ from pathlib import Path
 from ragdocqa.core.pipeline import RagPipeline
 
 QUESTIONS = [
-    "What must be checked before a cargo transfer begins?",
-    "How far from land must ballast water exchange be carried out?",
-    "What is required for chemical cargoes sensitive to oxygen?",
+    "What is the first-line pharmacologic agent for type 2 diabetes?",
+    "What should be done before starting an anticoagulant?",
+    "What must be confirmed before discharge?",
 ]
 
 
 def main() -> None:
-    doc = Path("data/fleet_sop.md").read_text(encoding="utf-8")
+    doc = Path("data/clinical_protocol.md").read_text(encoding="utf-8")
     pipe = RagPipeline()
-    n = pipe.ingest(doc, source="fleet_sop.md")
+    n = pipe.ingest(doc, source="clinical_protocol.md")
     backend = type(pipe.llm).__name__
     print(f"Ingested {n} chunks (backend: {backend})\n")
 

@@ -18,8 +18,8 @@ def test_chunking_empty():
 
 def test_hashing_embedder_is_deterministic_and_normalised():
     emb = HashingEmbedder()
-    a1 = emb.embed(["cargo transfer safety"])[0]
-    a2 = emb.embed(["cargo transfer safety"])[0]
+    a1 = emb.embed(["metformin diabetes first line"])[0]
+    a2 = emb.embed(["metformin diabetes first line"])[0]
     assert a1 == a2
     # L2 norm ~ 1 for non-empty text
     assert abs(sum(x * x for x in a1) - 1.0) < 1e-6
@@ -27,28 +27,28 @@ def test_hashing_embedder_is_deterministic_and_normalised():
 
 def test_similar_text_scores_higher():
     emb = HashingEmbedder()
-    q = emb.embed(["ballast water exchange distance from land"])[0]
-    related = emb.embed(["ballast water exchange must be 200 nautical miles from land"])[0]
-    unrelated = emb.embed(["the compatibility matrix for chemical cargoes"])[0]
+    q = emb.embed(["first line therapy for type 2 diabetes"])[0]
+    related = emb.embed(["metformin is first-line therapy for type 2 diabetes"])[0]
+    unrelated = emb.embed(["assess bleeding risk before anticoagulation"])[0]
     assert cosine(q, related) > cosine(q, unrelated)
 
 
 def test_vector_store_search_orders_by_similarity():
     emb = HashingEmbedder()
     store = VectorStore()
-    texts = ["bunkering checklist and scuppers", "crude oil ullage readings"]
+    texts = ["metformin first-line for type 2 diabetes", "check renal function annually"]
     store.add(texts, emb.embed(texts), source="t.md")
-    q = emb.embed(["what about bunkering and scuppers"])[0]
+    q = emb.embed(["what is first-line for type 2 diabetes"])[0]
     hits = store.search(q, top_k=2)
-    assert hits[0][0].text == "bunkering checklist and scuppers"
+    assert hits[0][0].text == "metformin first-line for type 2 diabetes"
 
 
 def test_extractive_llm_uses_context():
     llm = ExtractiveLLM()
     prompt = (
-        "CONTEXT:\n[1] Ballast water exchange must be carried out at least 200 "
-        "nautical miles from land. [2] Bunkering requires plugged scuppers.\n\n"
-        "QUESTION:\nHow far from land must ballast water exchange happen?"
+        "CONTEXT:\n[1] Metformin is the preferred initial agent for type 2 "
+        "diabetes. [2] Check renal function before starting.\n\n"
+        "QUESTION:\nWhat is the preferred initial agent for type 2 diabetes?"
     )
     answer = llm.generate(prompt)
-    assert "200" in answer and "nautical" in answer
+    assert "metformin" in answer.lower()
