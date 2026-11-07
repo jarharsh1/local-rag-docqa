@@ -1,4 +1,4 @@
-"""End-to-end CLI demo: ingest the sample clinical protocol and ask questions.
+"""End-to-end CLI demo: ingest the sample knowledge base and ask questions.
 
     python demo.py
 
@@ -11,16 +11,16 @@ from pathlib import Path
 from ragdocqa.core.pipeline import RagPipeline
 
 QUESTIONS = [
-    "What is the first-line pharmacologic agent for type 2 diabetes?",
-    "What should be done before starting an anticoagulant?",
-    "What must be confirmed before discharge?",
+    "How long do I have to request a refund?",
+    "What is the SLA for priority incidents?",
+    "How long is personal data retained?",
 ]
 
 
 def main() -> None:
-    doc = Path("data/clinical_protocol.md").read_text(encoding="utf-8")
+    doc = Path("data/sample_knowledge_base.md").read_text(encoding="utf-8")
     pipe = RagPipeline()
-    n = pipe.ingest(doc, source="clinical_protocol.md")
+    n = pipe.ingest(doc, source="sample_knowledge_base.md")
     backend = type(pipe.llm).__name__
     print(f"Ingested {n} chunks (backend: {backend})\n")
 
