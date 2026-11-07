@@ -1,9 +1,9 @@
 # Deployment guide
 
-An **Ollama-first clinical document-QA (RAG)** API with a bundled browser UI.
-Runs as local Python, a single Docker container, or the full `docker compose`
-stack (API + Ollama). Falls back to a deterministic **offline backend** when no
-model server is present, so it is always runnable.
+An **Ollama-first document-QA (vector RAG)** API with a bundled browser UI,
+working over any text corpus. Runs as local Python, a single Docker container,
+or the full `docker compose` stack (API + Ollama). Falls back to a deterministic
+**offline backend** when no model server is present, so it is always runnable.
 
 ## Architecture
 
@@ -21,8 +21,8 @@ model server is present, so it is always runnable.
               Ollama model server
 ```
 
-The bundled synthetic protocol (`data/clinical_protocol.md`) is pre-ingested at
-startup so the UI works immediately; add more via `POST /ingest`.
+The bundled sample knowledge base (`data/sample_knowledge_base.md`) is
+pre-ingested at startup so the UI works immediately; add more via `POST /ingest`.
 
 ## 1. Local (Python)
 

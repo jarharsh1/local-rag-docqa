@@ -1,4 +1,4 @@
-# Full local stack: the clinical document-QA API + an Ollama model server.
+# Full local stack: the document-QA (vector RAG) API + an Ollama model server.
 #
 #   docker compose up --build
 #   open http://localhost:8000
