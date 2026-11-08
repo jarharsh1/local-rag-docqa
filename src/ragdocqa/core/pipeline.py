@@ -33,6 +33,11 @@ class RagPipeline:
         self.store.add(chunks, embeddings, source)
         return len(chunks)
 
+    def reset(self) -> None:
+        """Drop all ingested records. The shared in-process store is otherwise
+        append-only, so this lets callers reclaim it between corpora/sessions."""
+        self.store.clear()
+
     def ask(self, question: str, top_k: int | None = None) -> dict:
         """Retrieve relevant chunks and generate a grounded answer with sources."""
         if len(self.store) == 0:

@@ -41,3 +41,15 @@ def test_ask_is_well_formed():
 def test_index_and_static_served():
     assert "RAG Engine" in client.get("/").text
     assert "/ask" in client.get("/static/app.js").text
+
+
+def test_reset_clears_the_shared_index():
+    client.post("/ingest", json={"text": "A refund may be requested within 30 days.", "source": "x"})
+    assert client.get("/health").json()["indexed_chunks"] > 0
+    r = client.post("/reset")
+    assert r.status_code == 200
+    assert r.json()["indexed_chunks"] == 0
+    # After reset the store is empty, so /ask reports nothing ingested.
+    body = client.post("/ask", json={"question": "anything"}).json()
+    assert body["answer"] == "No documents have been ingested yet."
+    assert body["sources"] == []

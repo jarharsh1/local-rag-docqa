@@ -84,6 +84,13 @@ def ask(req: AskRequest) -> AskResponse:
     return AskResponse(**result)
 
 
+@app.post("/reset")
+def reset() -> dict:
+    """Clear the shared in-process index (the index is append-only otherwise)."""
+    _pipeline.reset()
+    return {"status": "ok", "indexed_chunks": len(_pipeline.store)}
+
+
 # --- Browser UI ------------------------------------------------------------ #
 if _WEB_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(_WEB_DIR)), name="static")
