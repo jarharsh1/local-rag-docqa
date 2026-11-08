@@ -12,6 +12,30 @@ def test_chunking_overlap_and_coverage():
     assert all(len(c) <= 220 for c in chunks)  # allow boundary slack
 
 
+def test_chunking_covers_full_text_without_gaps():
+    # Varied prose so boundary breaks actually fire. Every character of the
+    # source must land in at least one chunk: locate each chunk in order and
+    # assert the spans leave no gap (a chunker that dropped middle text fails).
+    text = (
+        "Refunds are issued within thirty days. Priority incidents are "
+        "acknowledged within one hour and updated every four hours. Personal "
+        "data is retained for twenty-four months after the last activity. "
+        "Passwords must be at least twelve characters and stored as salted "
+        "hashes. Invoices are issued monthly and payable within fourteen days."
+    )
+    chunks = chunk_text(text, chunk_size=80, overlap=20)
+    assert len(chunks) > 1
+
+    cursor = 0  # highest source index covered so far
+    search_from = 0
+    for chunk in chunks:
+        pos = text.index(chunk, search_from)  # chunks appear in source order
+        assert pos <= cursor, "gap between chunks — source text was dropped"
+        cursor = max(cursor, pos + len(chunk))
+        search_from = pos
+    assert cursor == len(text.strip()), "chunks do not reach the end of the text"
+
+
 def test_chunking_empty():
     assert chunk_text("   ", 100, 10) == []
 
