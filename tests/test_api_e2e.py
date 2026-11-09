@@ -4,9 +4,17 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+from ragdocqa.api import main as api_main
 from ragdocqa.api.main import app
 
 client = TestClient(app)
+
+
+def test_sample_path_is_absolute_and_cwd_independent():
+    # _SAMPLE must resolve from the package location, not the process CWD, so the
+    # startup pre-ingest works no matter where the server is launched from.
+    assert api_main._SAMPLE.is_absolute()
+    assert api_main._SAMPLE.exists()
 
 
 def test_health_reports_offline_backend():
