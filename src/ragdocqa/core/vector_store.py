@@ -6,6 +6,7 @@ holds the chunk text, its embedding, and source metadata for citations.
 
 from __future__ import annotations
 
+import heapq
 import math
 from dataclasses import dataclass, field
 
@@ -45,8 +46,9 @@ class VectorStore:
 
     def search(self, query_embedding: list[float], top_k: int) -> list[tuple[Record, float]]:
         scored = [(r, cosine(query_embedding, r.embedding)) for r in self._records]
-        scored.sort(key=lambda t: t[1], reverse=True)
-        return scored[:top_k]
+        # nlargest is O(n log k) vs a full O(n log n) sort; equivalent result and
+        # tie-ordering to sorted(..., reverse=True)[:top_k].
+        return heapq.nlargest(top_k, scored, key=lambda t: t[1])
 
     def clear(self) -> None:
         self._records.clear()

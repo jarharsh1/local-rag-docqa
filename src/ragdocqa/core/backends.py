@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import math
 import re
+from functools import lru_cache
 from typing import Protocol
 
 import httpx
@@ -144,9 +145,15 @@ def _ollama_up(host: str) -> bool:
         return False
 
 
+@lru_cache(maxsize=1)
 def get_backends() -> tuple[Embedder, LLM]:
     """Return (embedder, llm): Ollama when reachable and not forced offline,
-    otherwise the deterministic offline pair."""
+    otherwise the deterministic offline pair.
+
+    Memoized: selection depends only on process-lifetime settings, so the 2s
+    Ollama probe runs once instead of on every RagPipeline() construction. The
+    returned backends are stateless and safe to share. Call
+    ``get_backends.cache_clear()`` if the environment changes (e.g. in tests)."""
     if not settings.offline and _ollama_up(settings.ollama_host):
         return (
             OllamaEmbedder(settings.ollama_host, settings.embed_model),
